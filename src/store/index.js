@@ -8,6 +8,7 @@ export default createStore({
   state: {
     todos: [],
     todoInput: '',
+    historyState: {},
   },
   getters: {
     getOpenTodos: (state) => state.todos.filter((todo) => todo.done === false),
@@ -18,6 +19,7 @@ export default createStore({
       state.todoInput = text;
     },
     addTodo(state) {
+      state.historyState = { ...state };
       const nextId = state.todos.length > 0 ? state.todos[0].id + 1 : 1;
       const todoObj = {
         id: nextId,
@@ -29,10 +31,12 @@ export default createStore({
       saveToStore(state.todos);
     },
     removeTodo(state, { id }) {
+      state.historyState = { ...state };
       state.todos = state.todos.filter((todo) => todo.id !== id);
       saveToStore(state.todos);
     },
     markTodoAsDone(state, { id }) {
+      state.historyState = { ...JSON.parse(JSON.stringify(state)) };
       const mutatedTodos = [...state.todos];
       const idx = mutatedTodos.findIndex((todo) => todo.id === id);
       if (idx !== -1) {
@@ -40,6 +44,14 @@ export default createStore({
       }
       state.todos = [...mutatedTodos];
       saveToStore(state.todos);
+    },
+    undo(state) {
+      if (state.historyState && state.historyState.todoInput !== undefined) {
+        state.todoInput = state.historyState.todoInput;
+        state.todos = [...state.historyState.todos];
+        state.historyState = { ...state.historyState.historyState };
+        saveToStore(state.todos);
+      }
     },
   },
   actions: {

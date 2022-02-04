@@ -1,9 +1,12 @@
 <template>
+  <button @click="undo">Undo</button>
   <NewTodo />
   <Todo />
 </template>
 
 <script>
+import { useStore } from 'vuex';
+
 import NewTodo from './components/NewTodo.vue';
 import Todo from './components/Todo.vue';
 
@@ -12,6 +15,17 @@ export default {
   components: {
     Todo,
     NewTodo,
+  },
+  setup() {
+    const store = useStore();
+
+    const undo = () => {
+      store.commit('undo');
+    };
+
+    return {
+      undo,
+    };
   },
 };
 </script>
